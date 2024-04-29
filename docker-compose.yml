@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  node:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: nodeapp
+    container_name: node-app
+    depends_on:
+      - db
+    #restart: always
+    env_file:
+      - .env
+    environment:
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_HOST=$MYSQL_HOST
+      - MYSQL_DB=$MYSQL_DB
+      - CUSTOMERS_HOST=db
+    ports:
+      - 3000:3000
+    volumes:
+      - nodeapp:/app
+    networks:
+      - frontend
+      - backend
+    
+  db:
+    image: mysql:8.0
+    container_name: mysqldb
+    #restart: always
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DB
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  dbdata:
+  nodeapp:
