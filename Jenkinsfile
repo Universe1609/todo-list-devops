@@ -24,10 +24,9 @@ pipeline{
         stage("Análisis Sonarqube") {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh '''  $SCANNER_HOME/bin/sonar-scanner \ 
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
                     -Dsonar.projectName=todo-list-app \
-                    -Dsonar.projectKey=todo-list-app
-                    '''
+                    -Dsonar.projectKey=todo-list-app'''
                 }
             }
         }
