@@ -42,7 +42,7 @@ pipeline{
 
         stage("Escaneo de Dependencias OWASP") {
             steps {
-                dependecyCheck additionalArguments: ''' -o './'
+                dependencyCheck additionalArguments: ''' -o './'
                                                         -s './'
                                                         -f 'ALL'
                                                         --prettyPrint''', odcInstallation: 'DP-Check'
