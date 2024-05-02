@@ -80,7 +80,7 @@ pipeline{
                     subject: "'${currentBuild.result}'",
                     body: "Project: ${env.JOB_NAME}" + "Build Number: ${BUILD_NUMBER}" + "URL: ${BUILD_URL} ",
                     to: "cloudgroupuni@gmail.com",
-                    attachmentsPattern: 'trivyimage-scanning-todo-list-app-*.txt, trivyfs-scanning-todo-list-app-*.txt'
+                    attachmentsPattern: 'trivyimage-scanning-todo-list-app-*.txt, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
             }
         }
     }
