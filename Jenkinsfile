@@ -8,6 +8,8 @@ pipeline{
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
         DOCKERFILE_NAME='todo-list-app'
+        TERRAFORM_CONDITION='true'
+        ENVIRONMENT='dev' // or prod
     }
     stages{
         stage("Clean WorkSpace"){
@@ -71,7 +73,28 @@ pipeline{
             }
         }
 
+        stage("Terraform Plan"){
+            when {
+                expression {env.TERRAFORM_CONDITION == 'true'}
+            }
+            steps {
+                dir('./Terraform') {
+                    sh 'terraform init'
+                    sh 'terraform plan -out=tfplan -var="env=${ENVIRONMENT}"'
+                }
+            }
+        }
 
+        stage("Terraform Apply"){
+            when {
+                expression {env.TERRAFORM_CONDITION == 'true'}
+            }
+            steps{
+                dir('./Terraform') {
+                    sh 'terrafomr apply -auto-approve tfplan'
+                }
+            }
+        }
     }
     post{
         always{
