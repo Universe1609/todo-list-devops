@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" "todo-list-devsecops-table" {
   name           = "todo-list-devsecops-table"
-  read_capacity  = 5
-  write_capacity = 5
+  read_capacity  = 1
+  write_capacity = 1
   hash_key       = "LockID"
 
   attribute {

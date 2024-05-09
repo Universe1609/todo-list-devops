@@ -8,7 +8,7 @@ pipeline{
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
         DOCKERFILE_NAME='todo-list-app'
-        TERRAFORM_CONDITION='true'
+        TERRAFORM_CONDITION='false'
         ENVIRONMENT='dev' // or prod
     }
     stages{
