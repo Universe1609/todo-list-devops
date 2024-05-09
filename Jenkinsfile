@@ -80,7 +80,7 @@ pipeline{
             steps {
                 dir('./Terraform') {
                     sh 'terraform init'
-                    sh 'terraform plan -out=tfplan -var="${ENVIRONMENT}"'
+                    sh 'terraform plan -out=tfplan '
                 }
             }
         }
