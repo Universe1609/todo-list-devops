@@ -13,3 +13,10 @@ resource "aws_dynamodb_table" "todo-list-devsecops-table" {
     "project" = "todo-list"
   }
 }
+
+resource "aws_s3_bucket" "todo-list-devsecops-project" {
+  bucket = "todo-list-devsecops-project"
+  tags = {
+    "project" = "todo-list"
+  }
+}
