@@ -54,7 +54,7 @@ pipeline{
 
         stage("Filesystem scanning con Trivy") {
             steps {
-                sh 'trivy fs . > trivyfs-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                sh 'trivy fs --scanners vuln,secret,misconfig . > trivyfs-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
             }
         }
 
@@ -79,7 +79,7 @@ pipeline{
             }
             steps {
                 dir('./Terraform') {
-                    sh 'terraform init'
+                    //sh 'terraform init' already s3 backend statefile
                     sh 'terraform plan'
                 }
             }
@@ -91,7 +91,7 @@ pipeline{
             }
             steps{
                 dir('./Terraform') {
-                    sh 'terraform apply -auto-approve tfplan'
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
