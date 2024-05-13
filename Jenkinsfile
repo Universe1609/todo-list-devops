@@ -62,15 +62,14 @@ pipeline{
             steps {
                 script {
                     sh 'docker system prune -f'
-                    sh 'docker build -t ${DOCKERFILE_NAME} .'
+                    sh 'docker build -t ${DOCKERFILE_NAME}:${BUILD_NUMBER} .'
                 }
             }
         }
 
         stage("Docker image scanning con Trivy") {
             steps {
-                sh 'trivy image -f json -o trivyimage-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.json ${DOCKERFILE_NAME}'
-                sh 'trivy image -f table ${DOCKERFILE_NAME} > testing.txt'
+                sh 'trivy image -f table ${DOCKERFILE_NAME} > trivyimage-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
             }
         }
 
@@ -80,7 +79,7 @@ pipeline{
             }
             steps {
                 dir('./Terraform') {
-                    sh 'terraform init'
+                    //sh 'terraform init'
                     sh 'terraform plan -out=tfplan '
                 }
             }
@@ -104,7 +103,7 @@ pipeline{
                     subject: "'${currentBuild.result}'",
                     body: "Project: ${env.JOB_NAME}" + "Build Number: ${BUILD_NUMBER}" + "URL: ${BUILD_URL} ",
                     to: "cloudgroupuni@gmail.com",
-                    attachmentsPattern: 'testing.txt, trivyimage-scanning-todo-list-app-*.json, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
+                    attachmentsPattern: 'trivyimage-scanning-todo-list-app-*.txt, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
             }
         }
     }

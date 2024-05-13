@@ -6,12 +6,11 @@ terraform {
     }
   }
 
-  # backend "s3" { 
-  #     bucket = "todo-list-devsecops-project"
-  #     key = "estado/terraform.tfstate"
-  #     region = "us-east-2"
-  #     encrypt = true
-  #     dynamodb_table = "todo-list-table"
-  # }
-
+  backend "s3" {
+    bucket         = "todo-list-devsecops-project"
+    key            = "estado/terraform.tfstate"
+    region         = "us-east-2"
+    encrypt        = true
+    dynamodb_table = "todo-list-devsecops-table"
+  }
 }
