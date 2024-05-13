@@ -54,7 +54,7 @@ pipeline{
 
         stage("Filesystem scanning con Trivy") {
             steps {
-                sh 'trivy fs --scanners vuln,secret,misconfig . > trivyfs-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                sh 'trivy fs --scanners vuln,secret,misconfig -f table . > trivyfs-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
             }
         }
 
