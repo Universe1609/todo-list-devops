@@ -69,7 +69,8 @@ pipeline{
 
         stage("Docker image scanning con Trivy") {
             steps {
-                sh 'trivy image ${DOCKERFILE_NAME} > trivyimage-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                sh 'trivy image -f json -o trivyimage-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.json ${DOCKERFILE_NAME}'
+                sh 'trivy image -f table ${DOCKERFILE_NAME} > testing.txt'
             }
         }
 
@@ -103,7 +104,7 @@ pipeline{
                     subject: "'${currentBuild.result}'",
                     body: "Project: ${env.JOB_NAME}" + "Build Number: ${BUILD_NUMBER}" + "URL: ${BUILD_URL} ",
                     to: "cloudgroupuni@gmail.com",
-                    attachmentsPattern: 'trivyimage-scanning-todo-list-app-*.txt, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
+                    attachmentsPattern: 'testing.txt, trivyimage-scanning-todo-list-app-*.json, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
             }
         }
     }
