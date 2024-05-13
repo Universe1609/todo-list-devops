@@ -79,7 +79,7 @@ pipeline{
             }
             steps {
                 dir('./Terraform') {
-                    //sh 'terraform init' already s3 backend statefile
+                    sh 'terraform init'
                     sh 'terraform plan'
                 }
             }
