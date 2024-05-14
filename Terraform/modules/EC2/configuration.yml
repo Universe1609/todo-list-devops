@@ -1,0 +1,145 @@
+---
+- name: Playbook de configuracion
+  hosts: all
+  become: yes
+  tasks:
+    - name: Actualizando paquetes
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+        force_apt_get: yes
+
+    - name: Openjdk 17
+      apt:
+        name:
+          - openjdk-17-jre
+          - openjdk-17-jdk
+        state: present
+
+    - name: Jenkins
+      block:
+        - name: instalando Repositorio
+          get_url:
+            url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+            dest: /usr/share/keyrings/jenkins-keyring.gpg
+            mode: '0644'
+
+        - name: Añadiendo repo
+          apt_repository:
+            repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian binary/
+            filename: jenkins
+
+        - name: Instalando Jenkins
+          apt:
+            name: jenkins
+            state: present
+            update_cache: yes
+
+    - name: Docker
+      block:
+        - name: Instalando Docker
+          apt:
+            name: docker.io
+            state: present
+
+        - name: Añadiendo jenkins y sudo user al grupo
+          user:
+            name: "{{ item }}"
+            groups: docker
+            append: yes
+          loop:
+            - jenkins
+            - ubuntu
+
+        - name: Reiniciar docker para aplicar los cambios
+          systemd:
+            name: docker
+            state: restarted
+
+        - name: Cambiar permisos del sock
+          file:
+            path: /var/run/docker.sock
+            mode: '0777'
+
+    - name: Revantar contenedor sonarqube
+      docker_container:
+        name: sonar
+        image: sonarqube:lts-community
+        state: started
+        published_ports:
+          - "9000:9000"
+        restart_policy: unless-stopped
+
+    - name: Instalando CLI de AWS
+      block:
+        - name: AWS CLI
+          get_url:
+            url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+            dest: /tmp/awscliv2.zip
+
+        - name: Unzip si no está
+          apt:
+            name: unzip
+            state: present
+
+        - name: Descumbrimiendo
+          unarchive:
+            src: /tmp/awscliv2.zip
+            dest: /tmp
+            remote_src: yes
+
+        - name: Instalando
+          command: sudo /tmp/aws/install
+
+    - name: Terraform
+      block:
+        - name: GPG Key de Hashicorp
+          apt_key:
+            url: https://apt.releases.hashicorp.com/gpg
+            state: present
+
+        - name: Hashicorp Repo
+          apt_repository:
+            repo: deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+
+        - name: Instalando Terraform 
+          apt:
+            name: terraform
+            update_cache: yes
+            state: present
+
+    - name: Trivy
+      apt_repository:
+        repo: deb https://aquasecurity.github.io/trivy-repo/deb {{ ansible_distribution_release }} main
+        state: present
+        filename: trivy
+      apt:
+        name: trivy
+        update_cache: yes
+        state: present
+
+    - name: Helm
+      snap:
+        name: helm
+        classic: yes
+
+    - name: Nginx y Cerbot
+      apt:
+        name:
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+        state: present
+      systemd:
+        name: nginx
+        enabled: yes
+        state: started
+
+    - name: Jenkins Password
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      changed_when: false
+
+    - name: Imprimiendo jenkins password
+      debug:
+        msg: "Jenkins initial password is: {{ jenkins_password.stdout }}"
