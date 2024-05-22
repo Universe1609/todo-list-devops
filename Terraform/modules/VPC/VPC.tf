@@ -19,16 +19,19 @@ resource "aws_subnet" "private_subnet" {
 
 }
 
-resource "aws_internet_gateway" "igw" {
-  vpc_id = data.aws_vpc.main.id
+data "aws_internet_gateway" "igw" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
 }
 
 resource "aws_route_table" "public_route_table" {
   vpc_id = data.aws_vpc.main.id
 
-  route = {
+  route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = data.aws_internet_gateway.igw.id
   }
 }
 
@@ -58,21 +61,32 @@ resource "aws_route_table_association" "private_rta" {
 
 resource "aws_security_group" "jenkins_security_group" {
   name   = "jenkins_security_group"
-  vpc_id = data.aws_vpc.main
+  vpc_id = data.aws_vpc.main.id
 
   ingress = [
     for port in [22, 443, 8080, 9000] : {
-      from_port   = port
-      to_port     = port
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      from_port        = port
+      to_port          = port
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      description      = "Allow inbound traffic"
+      ipv6_cidr_blocks = ["::/0"]
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
     }
   ]
 
-  egress = {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  egress = [{
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    description      = "Egress"
+    ipv6_cidr_blocks = ["::/0"]
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+    }
+  ]
 }
